@@ -80,19 +80,49 @@ function check_cluster_admin(){
     fi
 }
 
+function check_node_status() {
+    output=""
+    echo -e "\nChecking node status" | tee -a ${OUTPUT}
+    cmd=$(oc get $NH nodes | egrep -vw 'Ready')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_node_count=$(oc get $NH nodes |egrep -vw 'Ready'|wc -l) 
 
-User_Authentication_Check() {
-  check_oc_logged_in
-  check_cluster_admin
-  if [[ ${ERROR} -eq 1 ]]; then
+    if [ $down_node_count -gt 0 ]; then
+        log "ERROR: Not all nodes are ready." result
+        ERROR=1
+    else
+        log "Checking node status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+
+## Check OpenShift CLI autentication ##
+function User_Authentication_Check() {
+    check_oc_logged_in
+    check_cluster_admin
+
+    if [[ ${ERROR} -eq 1 ]]; then
         output=""
         log "NOTE: User Authentication Failed. Exiting." result
         output+="$result"
         printout "$output"
         exit 1
-  fi
+    fi
+}
+
+
+## Platform checks related to nodes ##
+function Nodes_Check() {
+    check_node_status
 }
 
 
 setup $@
 User_Authentication_Check
+Nodes_Check
