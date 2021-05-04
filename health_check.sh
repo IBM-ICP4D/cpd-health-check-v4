@@ -101,6 +101,50 @@ function check_node_status() {
     fi
 }
 
+function check_node_cpu_utilization() {
+    output=""
+    echo -e "\nChecking node CPU utilization" | tee -a ${OUTPUT}
+    cmd=$(oc adm top nodes $NH)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    high_cpu_usage=$(oc adm top nodes $NH | egrep -v "unknown" | \
+                   awk '{ gsub(/[%]+/," "); print $1 " " $3}'| awk '{if ($2 >= "80" ) print }' | wc -l) 
+
+    if [ $high_cpu_usage -gt 0 ]; then
+        log "WARNING: Some nodes have above 80% CPU utilization." result
+        ERROR=1
+    else
+        log "Checking node CPU utilization [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_node_memory_utilization() {
+    output=""
+    echo -e "\nChecking node memory utilization" | tee -a ${OUTPUT}
+    cmd=$(oc adm top nodes $NH)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    high_memory_usage=$(oc adm top nodes $NH | egrep -v "unknown" | \
+                   awk '{ gsub(/[%]+/," "); print $1 " " $5}'| awk '{if ($2 >= "80" ) print }' | wc -l) 
+
+    if [ $high_memory_usage -gt 0 ]; then
+        log "WARNING: Some nodes have above 80% memory utilization." result
+        ERROR=1
+    else
+        log "Checking node memory utilization [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 
 ## Check OpenShift CLI autentication ##
 function User_Authentication_Check() {
@@ -120,6 +164,8 @@ function User_Authentication_Check() {
 ## Platform checks related to nodes ##
 function Nodes_Check() {
     check_node_status
+    check_node_cpu_utilization
+    check_node_memory_utilization
 }
 
 
