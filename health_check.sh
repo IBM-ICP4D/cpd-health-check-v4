@@ -37,6 +37,28 @@ function printout() {
     echo -e "$1" | tee -a ${OUTPUT}
 }
 
+
+function check_oc_logged_in(){
+    output=""
+    echo -e "\nChecking for logged into OpenShift" | tee -a ${OUTPUT}
+    cmd=$(oc whoami)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    exists=$(oc whoami) 
+
+    if [[ $? -ne 0 ]]; then
+        log "ERROR: You need to login to OpenShift to run healthcheck." result
+        ERROR=1
+    else
+        log "Checking for logged into OpenShift [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 function check_cluster_admin(){
     output=""
     echo -e "\nChecking for cluster-admin role" | tee -a ${OUTPUT}
@@ -59,13 +81,18 @@ function check_cluster_admin(){
 }
 
 
-Health_CHK() {
-  local logs_dir=`mktemp -d`
-  cd $HOME_DIR
+User_Authentication_Check() {
+  check_oc_logged_in
   check_cluster_admin
-  #./health_check/icpd-health-check-master.sh | tee health_check.log
+  if [[ ${ERROR} -eq 1 ]]; then
+        output=""
+        log "NOTE: User Authentication Failed. Exiting." result
+        output+="$result"
+        printout "$output"
+        exit 1
+  fi
 }
 
 
 setup $@
-Health_CHK
+User_Authentication_Check
