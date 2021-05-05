@@ -303,6 +303,72 @@ function check_replicasets() {
     fi
 }
 
+function check_routes() {
+    output=""
+    all_routes=`oc get route --all-namespaces | egrep 'ibm-nginx-svc|console-openshift-console' | awk '{print $3}'`
+    echo -e "\nChecking routes" | tee -a ${OUTPUT}
+    for i in `echo ${all_routes}`
+        do
+            cmd=$(curl -k $i)
+            if [[ $? -ne 0 ]]; then
+               log "ERROR: Access to route $i [Failed]" result
+               ERROR=1
+            else
+               log "Access to route $i [Passed]" result
+            fi
+            LOCALTEST=1
+            output+="$result"
+
+            if [[ ${LOCALTEST} -eq 1 ]]; then
+                printout "$output"
+                output=""
+            fi
+        done    
+}
+
+function check_certificates() {
+    output=""
+    echo -e "\nChecking certificates signing status" | tee -a ${OUTPUT}
+    cmd=$(oc get csr | grep Pending)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_csr_count=$(oc get csr $NH | grep Pending | wc -l) 
+
+    if [ $down_csr_count -gt 0 ]; then
+        log "ERROR: Some certificates are in pending state." result
+        ERROR=1
+    else
+        log "Checking certificates signing status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_etcd() {
+    output=""
+    echo -e "\nChecking etcd nodes status" | tee -a ${OUTPUT}
+    cmd=$(oc get etcd -o=jsonpath='{range .items[0].status.conditions[?(@.type=="EtcdMembersAvailable")]}{.message}{"\n"}')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_etcd_count=$(oc get etcd -o=jsonpath='{range .items[0].status.conditions[?(@.type=="EtcdMembersAvailable")]}{.message}{"\n"}' | \
+                    egrep -i 'have not started|are unhealthy|are unknown' | wc -l) 
+
+    if [ $down_etcd_count -gt 0 ]; then
+        log "ERROR: Some etcd nodes are unhealthy." result
+        ERROR=1
+    else
+        log "Checking etcs node status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 
 ## Check OpenShift CLI autentication ##
 function User_Authentication_Check() {
@@ -336,6 +402,14 @@ function Applications_Check() {
     check_deployments
     check_statefulsets
     check_replicasets
+    check_routes
+}
+
+
+## Checks specific to Openshift ##
+function Openshift_Check() {
+    check_certificates
+    check_etcd
 }
 
 
@@ -344,4 +418,5 @@ setup $@
 User_Authentication_Check
 Nodes_Check
 Applications_Check
+Openshift_Check
 
