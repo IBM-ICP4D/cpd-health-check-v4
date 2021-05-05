@@ -240,6 +240,68 @@ function check_node_pid_status() {
         done    
 }
 
+function check_deployments() {
+    output=""
+    echo -e "\nChecking deployment status" | tee -a ${OUTPUT}
+    cmd=$(oc get deployment --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_deployment_count=$(oc get $NH deployment --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9' | wc -l) 
+
+    if [ $down_deployment_count -gt 0 ]; then
+        log "ERROR: Not all deployments are ready." result
+        ERROR=1
+    else
+        log "Checking deployment status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_statefulsets() {
+    output=""
+    echo -e "\nChecking StatefulSet status" | tee -a ${OUTPUT}
+    cmd=$(oc get sts --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_sts_count=$(oc get $NH sts --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9' | wc -l) 
+
+    if [ $down_sts_count -gt 0 ]; then
+        log "ERROR: Not all StatefulSets are ready." result
+        ERROR=1
+    else
+        log "Checking StatefulSets status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_replicasets() {
+    output=""
+    echo -e "\nChecking replicaset status" | tee -a ${OUTPUT}
+    cmd=$(oc get rs --all-namespaces | awk '{if ($3 != $4) print $0}')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_rs_count=$(oc get rs $NH --all-namespaces | awk '{if ($3 != $4) print $0}' | wc -l) 
+
+    if [ $down_rs_count -gt 0 ]; then
+        log "ERROR: Not all replicasets are ready." result
+        ERROR=1
+    else
+        log "Checking replicasets status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
 
 
 ## Check OpenShift CLI autentication ##
@@ -269,6 +331,17 @@ function Nodes_Check() {
 }
 
 
+## Platform checks related to applications ##
+function Applications_Check() {
+    check_deployments
+    check_statefulsets
+    check_replicasets
+}
+
+
+#### MAIN ####
 setup $@
 User_Authentication_Check
 Nodes_Check
+Applications_Check
+
