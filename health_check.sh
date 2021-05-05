@@ -14,6 +14,7 @@ setup() {
   export NH="--no-headers"
 
   export LINE=500
+  export NODE_TIMEDIFF=400
 
   #source $UTIL_DIR/util.sh
   #. $UTIL_DIR/get_params.sh 
@@ -62,7 +63,7 @@ function check_oc_logged_in(){
 function check_cluster_admin(){
     output=""
     echo -e "\nChecking for cluster-admin role" | tee -a ${OUTPUT}
-    cluster_admin=$(oc get $NH clusterrolebindings/cluster-admin)
+    cluster_admin=$(oc get clusterrolebindings/cluster-admin)
     echo "${cluster_admin}" | tee -a ${OUTPUT}
     exists=$(oc get $NH clusterrolebindings/cluster-admin | egrep -i 'cluster-admin') 
 
@@ -83,7 +84,7 @@ function check_cluster_admin(){
 function check_node_status() {
     output=""
     echo -e "\nChecking node status" | tee -a ${OUTPUT}
-    cmd=$(oc get $NH nodes | egrep -vw 'Ready')
+    cmd=$(oc get nodes | egrep -vw 'Ready')
     echo "${cmd}" | tee -a ${OUTPUT}
     down_node_count=$(oc get $NH nodes |egrep -vw 'Ready'|wc -l) 
 
@@ -104,7 +105,7 @@ function check_node_status() {
 function check_node_cpu_utilization() {
     output=""
     echo -e "\nChecking node CPU utilization" | tee -a ${OUTPUT}
-    cmd=$(oc adm top nodes $NH)
+    cmd=$(oc adm top nodes)
     echo "${cmd}" | tee -a ${OUTPUT}
     high_cpu_usage=$(oc adm top nodes $NH | egrep -v "unknown" | \
                    awk '{ gsub(/[%]+/," "); print $1 " " $3}'| awk '{if ($2 >= "80" ) print }' | wc -l) 
@@ -126,7 +127,7 @@ function check_node_cpu_utilization() {
 function check_node_memory_utilization() {
     output=""
     echo -e "\nChecking node memory utilization" | tee -a ${OUTPUT}
-    cmd=$(oc adm top nodes $NH)
+    cmd=$(oc adm top nodes)
     echo "${cmd}" | tee -a ${OUTPUT}
     high_memory_usage=$(oc adm top nodes $NH | egrep -v "unknown" | \
                    awk '{ gsub(/[%]+/," "); print $1 " " $5}'| awk '{if ($2 >= "80" ) print }' | wc -l) 
@@ -145,6 +146,30 @@ function check_node_memory_utilization() {
     fi
 }
 
+function check_node_time_difference() {
+    output=""
+    #all_nodes=`oc get nodes -o=jsonpath="{range .items[*]}{.metadata.name}{.name}{'\n'}"`
+    all_nodes=`oc get nodes $NH | grep -w Ready | awk '{print $1}'`
+    echo -e "\nChecking time difference between nodes" | tee -a ${OUTPUT}
+    for i in `echo ${all_nodes}`
+        do
+            diff=`clockdiff $i | awk '{print $3}'`
+            (( diff = $diff < 0 ? $diff * -1 : $diff ))
+            if [ $diff -lt  $NODE_TIMEDIFF ]; then
+               log "Time difference with node $i [Passed]" result
+            else
+               log "ERROR: Time difference with node $i [Failed]" result
+               ERROR=1
+            fi
+            LOCALTEST=1
+            output+="$result"
+
+            if [[ ${LOCALTEST} -eq 1 ]]; then
+                printout "$output"
+                output=""
+            fi
+        done    
+}
 
 ## Check OpenShift CLI autentication ##
 function User_Authentication_Check() {
@@ -166,6 +191,7 @@ function Nodes_Check() {
     check_node_status
     check_node_cpu_utilization
     check_node_memory_utilization
+    check_node_time_difference
 }
 
 
