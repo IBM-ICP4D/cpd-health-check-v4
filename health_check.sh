@@ -171,6 +171,77 @@ function check_node_time_difference() {
         done    
 }
 
+function check_node_memory_status() {
+    output=""
+    all_nodes=`oc get nodes $NH | grep -w Ready | awk '{print $1}'`
+    echo -e "\nChecking memory status on nodes" | tee -a ${OUTPUT}
+    for i in `echo ${all_nodes}`
+        do
+            mem=$(oc describe node $i | grep 'MemoryPressure   False' |  wc -l)
+            if [ $mem -eq 0 ]; then
+               log "ERROR: Memory pressure on node $i [Failed]" result
+               ERROR=1
+            else
+               log "Memory pressure on node $i [Passed]" result
+            fi
+            LOCALTEST=1
+            output+="$result"
+
+            if [[ ${LOCALTEST} -eq 1 ]]; then
+                printout "$output"
+                output=""
+            fi
+        done    
+}
+
+function check_node_disk_status() {
+    output=""
+    all_nodes=`oc get nodes $NH | grep -w Ready | awk '{print $1}'`
+    echo -e "\nChecking disk status on nodes" | tee -a ${OUTPUT}
+    for i in `echo ${all_nodes}`
+        do
+            mem=$(oc describe node $i | grep 'DiskPressure     False' |  wc -l)
+            if [ $mem -eq 0 ]; then
+               log "ERROR: Disk pressure on node $i [Failed]" result
+               ERROR=1
+            else
+               log "Disk pressure on node $i [Passed]" result
+            fi
+            LOCALTEST=1
+            output+="$result"
+
+            if [[ ${LOCALTEST} -eq 1 ]]; then
+                printout "$output"
+                output=""
+            fi
+        done    
+}
+
+function check_node_pid_status() {
+    output=""
+    all_nodes=`oc get nodes $NH | grep -w Ready | awk '{print $1}'`
+    echo -e "\nChecking disk status on nodes" | tee -a ${OUTPUT}
+    for i in `echo ${all_nodes}`
+        do
+            mem=$(oc describe node $i | grep 'PIDPressure      False' |  wc -l)
+            if [ $mem -eq 0 ]; then
+               log "ERROR: PID pressure on node $i [Failed]" result
+               ERROR=1
+            else
+               log "PID pressure on node $i [Passed]" result
+            fi
+            LOCALTEST=1
+            output+="$result"
+
+            if [[ ${LOCALTEST} -eq 1 ]]; then
+                printout "$output"
+                output=""
+            fi
+        done    
+}
+
+
+
 ## Check OpenShift CLI autentication ##
 function User_Authentication_Check() {
     check_oc_logged_in
@@ -192,6 +263,9 @@ function Nodes_Check() {
     check_node_cpu_utilization
     check_node_memory_utilization
     check_node_time_difference
+    check_node_memory_status
+    check_node_disk_status
+    check_node_pid_status
 }
 
 
