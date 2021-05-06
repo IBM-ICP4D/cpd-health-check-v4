@@ -3,6 +3,8 @@ The health check tool verifies the overall health of the Cloud Pak for Data (CPD
 
 ## Check lists
 ### Validate Platform
+This section targets OpenShift and CPD platform specific checks.
+
 | Validation | Details |
 | --- | --- |
 | Nodes status | Validate nodes in ready state |
@@ -26,9 +28,14 @@ The health check tool verifies the overall health of the Cloud Pak for Data (CPD
 | High memory consuming pods | List top 15 memory consumed pods |
 | High numner of restarted pods | List top 15 pods that restarted |
 
-### Validate CPD Services
-| Validation | Details |
-| --- | --- |
+### Validate CPD Services <img width="40" alt="image" src="https://user-images.githubusercontent.com/17136230/117361229-632c9580-aed7-11eb-9e1d-0210c5398207.png">
+
+This section targets most common services e.g., WKC, WML, DV, DataStage etc. 
+
+-	Components check
+-	Application check
+-	Logs or event check
+
 
 
 ## Setup and execution 
