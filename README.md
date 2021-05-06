@@ -5,7 +5,14 @@ The health check tool verifies the overall health of the Cloud Pak for Data (CPD
 ### Validate Platform
 | Validation | |
 | --- | --- |
-| Node Status | |
+| Node status | |
+| Node CPU utilization | |
+| Node memory utilization | |
+| Time difference between nodes | |
+| Node memory status | |
+| Node disk status | |
+| Node pid status | |
+
 
 ## Setup and execution 
 1. Use any Linux machine with OpenShift client (oc) installed that can connect to the CPD cluster.
