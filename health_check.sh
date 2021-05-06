@@ -303,6 +303,27 @@ function check_replicasets() {
     fi
 }
 
+function check_daemonsets() {
+    output=""
+    echo -e "\nChecking daemonset status" | tee -a ${OUTPUT}
+    cmd=$(oc get daemonset --all-namespaces | awk '{if ($3 != $5) print $0}')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_ds_count=$(oc get daemonset $NH --all-namespaces | awk '{if ($3 != $5) print $0}' | wc -l) 
+
+    if [ $down_ds_count -gt 0 ]; then
+        log "WARNING: Not all daemonsets are ready." result
+        ERROR=1
+    else
+        log "Checking daemonset status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 function check_routes() {
     output=""
     all_routes=`oc get route --all-namespaces | egrep 'ibm-nginx-svc|console-openshift-console' | awk '{print $3}'`
@@ -369,6 +390,48 @@ function check_etcd() {
     fi
 }
 
+function check_volume_status() {
+    output=""
+    echo -e "\nChecking persistent volume status" | tee -a ${OUTPUT}
+    cmd=$(oc get pv | awk '{if ($5 != "Bound" && $5 != "Released") print $0}')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_pv_count=$(oc get pv $NH | awk '{if ($5 != "Bound" && $5 != "Released") print $0}' | wc -l) 
+
+    if [ $down_pv_count -gt 0 ]; then
+        log "ERROR: Not all persistent volumes are ready." result
+        ERROR=1
+    else
+        log "Checking persistent volume status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_volumeclaim_status() {
+    output=""
+    echo -e "\nChecking persistent volume claim status" | tee -a ${OUTPUT}
+    cmd=$(oc get pvc | awk '{if ($2 != "Bound") print $0}')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_pvc_count=$(oc get pvc $NH | awk '{if ($2 != "Bound") print $0}' | wc -l) 
+
+    if [ $down_pvc_count -gt 0 ]; then
+        log "ERROR: Not all persistent volume claims are ready." result
+        ERROR=1
+    else
+        log "Checking persistent volume claim status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 
 ## Check OpenShift CLI autentication ##
 function User_Authentication_Check() {
@@ -402,6 +465,7 @@ function Applications_Check() {
     check_deployments
     check_statefulsets
     check_replicasets
+    check_daemonsets
     check_routes
 }
 
@@ -413,10 +477,17 @@ function Openshift_Check() {
 }
 
 
+## Checks specific to Volume ##
+function Volume_Check() {
+    check_volume_status
+    check_volumeclaim_status
+}
+
 #### MAIN ####
 setup $@
 User_Authentication_Check
 Nodes_Check
 Applications_Check
 Openshift_Check
+Volume_Check
 
