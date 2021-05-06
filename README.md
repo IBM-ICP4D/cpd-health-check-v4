@@ -5,13 +5,26 @@ The health check tool verifies the overall health of the Cloud Pak for Data (CPD
 ### Validate Platform
 | Validation | |
 | --- | --- |
-| Node status | |
-| Node CPU utilization | |
-| Node memory utilization | |
+| Nodes status | |
+| Nodes CPU utilization | |
+| Nodes memory utilization | |
 | Time difference between nodes | |
-| Node memory status | |
-| Node disk status | |
-| Node pid status | |
+| Nodes memory status | |
+| Nodes disk status | |
+| Nodes pid status | |
+| Deployments status | |
+| Statefulset status | |
+| Replicasets status | |
+| Daemonsets status | |
+| Routes status | |
+| Openshift certificates status | |
+| Openshift ETCD status | |
+| Persistent volume status | |
+| Persistent volume claims status | |
+| Pods status | |
+| High CPU consuming pods | |
+| High memory consuming pods | |
+| High numner of restarted pods | |
 
 
 ## Setup and execution 
