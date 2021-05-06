@@ -55,4 +55,7 @@ oc login <OpenShift Console URL> -u <username> -p <password>
 ```
 
 ## Output
-The health check tool will direct result outputs to screen, you can view same results in `/tmp/HealthCheckResult`
+The health check tool will direct result outputs to screen, you can view same results in `/tmp/HealthCheckResult`. Excerpt from a health check results:
+
+<img width="1038" alt="image" src="https://user-images.githubusercontent.com/17136230/117359964-d03f2b80-aed5-11eb-9f6d-baaa9dd60a5c.png">
+
