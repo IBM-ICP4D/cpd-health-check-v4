@@ -14,6 +14,7 @@ setup() {
   export NH="--no-headers"
 
   export LINE=500
+  export PODLIST=16
   export NODE_TIMEDIFF=400
 
   #source $UTIL_DIR/util.sh
@@ -416,7 +417,7 @@ function check_volumeclaim_status() {
     echo -e "\nChecking persistent volume claim status" | tee -a ${OUTPUT}
     cmd=$(oc get pvc | awk '{if ($2 != "Bound") print $0}')
     echo "${cmd}" | tee -a ${OUTPUT}
-    down_pvc_count=$(oc get pvc $NH | awk '{if ($2 != "Bound") print $0}' | wc -l) 
+    down_pvc_count=$(oc get pvc $NH | awk '{if ($2 != "Bound" && $2 != "Available") print $0}' | wc -l) 
 
     if [ $down_pvc_count -gt 0 ]; then
         log "ERROR: Not all persistent volume claims are ready." result
@@ -431,6 +432,70 @@ function check_volumeclaim_status() {
         printout "$output"
     fi
 }
+
+function check_pod_status() {
+    output=""
+    echo -e "\nChecking POD status" | tee -a ${OUTPUT}
+    cmd=$(oc get pod --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9|Complete')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_pod_count=$(oc get pod $NH --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9|Complete' | wc -l) 
+
+    if [ $down_pod_count -gt 0 ]; then
+        log "ERROR: Not all pods are ready." result
+        ERROR=1
+    else
+        log "Checking pod status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_high_cpu_consuming_pods() {
+    output=""
+    log "" result
+    echo -e "\nChecking for high CPU consuming pods" | tee -a ${OUTPUT}
+    cmd=$(oc adm top pods --all-namespaces  --sort-by='cpu' | head -$PODLIST)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_high_memory_consuming_pods() {
+    output=""
+    log "" result
+    echo -e "\nChecking for high memory consuming pods" | tee -a ${OUTPUT}
+    cmd=$(oc adm top pods --all-namespaces  --sort-by='memory' | head -$PODLIST)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_high_pod_restart_count() {
+    output=""
+    log "" result
+    echo -e "\nChecking for high number of times pods restarted" | tee -a ${OUTPUT}
+    cmd=$(oc get pods --sort-by='.status.containerStatuses[0].restartCount' --all-namespaces | { read -r headers; echo "$headers"; tail -$PODLIST; })
+    echo "${cmd}" | tee -a ${OUTPUT}
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 
 
 ## Check OpenShift CLI autentication ##
@@ -483,6 +548,16 @@ function Volume_Check() {
     check_volumeclaim_status
 }
 
+
+## Checks specific to POD ##
+function Pod_Check() {
+    check_pod_status
+    check_high_cpu_consuming_pods
+    check_high_memory_consuming_pods
+    check_high_pod_restart_count
+}
+
+
 #### MAIN ####
 setup $@
 User_Authentication_Check
@@ -490,4 +565,5 @@ Nodes_Check
 Applications_Check
 Openshift_Check
 Volume_Check
+Pod_Check
 
