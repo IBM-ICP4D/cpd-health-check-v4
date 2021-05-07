@@ -36,6 +36,11 @@ This section targets most common services e.g., WKC, WML, DV, DataStage etc.
 -	Application check
 -	Logs or event check
 
+| Validation | Details |
+| --- | --- |
+| DV pods | All DV pods are exist |
+| DV statefulsets | All DV statefulsets are exist |
+| DV deployments | All DV deployments are exist |
 
 
 ## Setup and execution 
