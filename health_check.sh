@@ -496,6 +496,90 @@ function check_high_pod_restart_count() {
     fi
 }
 
+function check_DV_pods() {
+    output=""
+    ERROR=0
+    all_dv_pods=${DV_PODS}
+    echo -e "\nChecking all DV pods exist" | tee -a ${OUTPUT}
+    for i in `echo ${all_dv_pods}`
+        do
+            oc get pods -n ${dv_namespace} | grep ${i} > /dev/null
+            if [[ $? -ne 0 ]]; then
+               echo -e "Pod ${i} not found" | tee -a ${OUTPUT}
+               ERROR=1
+            fi
+        done    
+
+    if [[ ${ERROR} -eq 1 ]]; then
+        log "ERROR: Some DV pods are missing." result
+    else
+        log "Checking all DV pods exist [Passed]" result
+    fi    
+
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_DV_sts() {
+    output=""
+    ERROR=0
+    all_dv_sts=${DV_STS}
+    echo -e "\nChecking all DV statefulsets exist" | tee -a ${OUTPUT}
+    for i in `echo ${all_dv_sts}`
+        do
+            oc get sts -n ${dv_namespace} | grep ${i} > /dev/null
+            if [[ $? -ne 0 ]]; then
+               echo -e "Statefulset ${i} not found" | tee -a ${OUTPUT}
+               ERROR=1
+            fi
+        done    
+
+    if [[ ${ERROR} -eq 1 ]]; then
+        log "ERROR: Some DV statefulsets are missing." result
+    else
+        log "Checking all DV statefulsets exist [Passed]" result
+    fi    
+
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_DV_deployments() {
+    output=""
+    ERROR=0
+    all_dv_deployment=${DV_DEPLOYMENTS}
+    echo -e "\nChecking all DV deployments exist" | tee -a ${OUTPUT}
+    for i in `echo ${all_dv_deployment}`
+        do
+            oc get deployment -n ${dv_namespace} | grep ${i} > /dev/null
+            if [[ $? -ne 0 ]]; then
+               echo -e "Deployment ${i} not found" | tee -a ${OUTPUT}
+               ERROR=1
+            fi
+        done    
+
+    if [[ ${ERROR} -eq 1 ]]; then
+        log "ERROR: Some DV deployments are missing." result
+    else
+        log "Checking all DV deploymentis exist [Passed]" result
+    fi    
+
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 
 #######################################
 #### CPD platform specific checks  ####
@@ -564,10 +648,12 @@ function Pod_Check() {
 #######################################
 #### CPD services specific checks  ####
 #######################################
-function print_install_cpd_services() {
+
+## Find installed CPD services charts
+function Find_Services() {
     output=""
     log "" result
-    echo -e "\nList of installed CPD images" | tee -a ${OUTPUT}
+    echo -e "\nList of installed CPD service helm charts" | tee -a ${OUTPUT}
     cmd=$(get_installed_cpd_services)
     echo "${cmd}" | tee -a ${OUTPUT}
     LOCALTEST=1
@@ -577,11 +663,14 @@ function print_install_cpd_services() {
     find_installed_cpd_services
 }
 
-
-
-function Find_Installed_Services() {
-    print_install_cpd_services
+## Checks related to Data Virtualization service
+function DV_Check() {
+    dv_namespace=$(find_installed_namespace dv)
+    check_DV_pods
+    check_DV_sts
+    check_DV_deployments
 }
+
 
 #######################################
 ####             MAIN              ####
@@ -597,4 +686,6 @@ Volume_Check
 Pod_Check
 
 ## CPD services specific checks
-Find_Installed_Services
+Find_Services
+DV_Check
+
