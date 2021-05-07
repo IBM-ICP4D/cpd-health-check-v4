@@ -17,7 +17,7 @@ setup() {
   export PODLIST=16
   export NODE_TIMEDIFF=400
 
-  #source $UTIL_DIR/util.sh
+  source $UTIL_DIR/util.sh
   #. $UTIL_DIR/get_params.sh 
 }
 
@@ -497,6 +497,9 @@ function check_high_pod_restart_count() {
 }
 
 
+#######################################
+#### CPD platform specific checks  ####
+#######################################
 
 ## Check OpenShift CLI autentication ##
 function User_Authentication_Check() {
@@ -558,12 +561,40 @@ function Pod_Check() {
 }
 
 
-#### MAIN ####
+#######################################
+#### CPD services specific checks  ####
+#######################################
+function print_install_cpd_services() {
+    output=""
+    log "" result
+    echo -e "\nList of installed CPD images" | tee -a ${OUTPUT}
+    cmd=$(get_installed_cpd_services)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    LOCALTEST=1
+    output+="$result"
+    printout "$output"
+
+    find_installed_cpd_services
+}
+
+
+
+function Find_Installed_Services() {
+    print_install_cpd_services
+}
+
+#######################################
+####             MAIN              ####
+#######################################
 setup $@
 User_Authentication_Check
+
+## CPD services specific checks
 Nodes_Check
 Applications_Check
 Openshift_Check
 Volume_Check
 Pod_Check
 
+## CPD services specific checks
+Find_Installed_Services
