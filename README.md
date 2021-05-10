@@ -42,6 +42,7 @@ This section targets most common services e.g., WKC, WML, DV, DataStage etc.
 | DV statefulsets | All DV statefulsets are exist |
 | DV deployments | All DV deployments are exist |
 | DV services | All DV services are exist |
+| DV internal database | BIGSQL instance is running |
 
 
 ## Setup and execution 
