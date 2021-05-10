@@ -580,6 +580,34 @@ function check_DV_deployments() {
     fi
 }
 
+function check_DV_services() {
+    output=""
+    ERROR=0
+    all_dv_service=${DV_SERVICES}
+    echo -e "\nChecking all DV services exist" | tee -a ${OUTPUT}
+    for i in `echo ${all_dv_service}`
+        do
+            oc get service -n ${dv_namespace} | grep ${i} > /dev/null
+            if [[ $? -ne 0 ]]; then
+               echo -e "Service ${i} not found" | tee -a ${OUTPUT}
+               ERROR=1
+            fi
+        done    
+
+    if [[ ${ERROR} -eq 1 ]]; then
+        log "ERROR: Some DV services are missing." result
+    else
+        log "Checking all DV services exist [Passed]" result
+    fi    
+
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 
 #######################################
 #### CPD platform specific checks  ####
@@ -669,6 +697,7 @@ function DV_Check() {
     check_DV_pods
     check_DV_sts
     check_DV_deployments
+    check_DV_services
 }
 
 
