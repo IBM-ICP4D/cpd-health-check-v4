@@ -34,7 +34,15 @@ find_installed_namespace() {
 
 }
 
+find_db2_status() {
+   pod_name=$1
+   db2_instance=$2
+
+   kubectl exec -it $pod_name -- bash -c "export DB2INSTANCE=$db2_instance && ~/sqllib/adm/db2pd -" 
+}
+
 typeset -fx get_installed_cpd_services
 typeset -fx find_installed_cpd_services
 typeset -fx find_installed_namespace
+typeset -fx find_db2_status
 

@@ -608,6 +608,27 @@ function check_DV_services() {
     fi
 }
 
+function check_DV_databse_instance() {
+    output=""
+    echo -e "\nChecking DV database instance status" | tee -a ${OUTPUT}
+    cmd=$(find_db2_status dv-engine-0 bigsql)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_db_count=$(find_db2_status dv-engine-0 bigsql | grep "Active" | wc -l) 
+
+    if [[ ${down_db_count} -lt 1 ]]; then
+        log "ERROR: Bigsql instance is not ready." result
+        ERROR=1
+    else
+        log "Checking DV database instance status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
 
 #######################################
 #### CPD platform specific checks  ####
@@ -698,6 +719,7 @@ function DV_Check() {
     check_DV_sts
     check_DV_deployments
     check_DV_services
+    check_DV_databse_instance
 }
 
 
@@ -707,7 +729,11 @@ function DV_Check() {
 setup $@
 User_Authentication_Check
 
-## CPD services specific checks
+## CPD platform checks
+output=""
+echo -e "\n#### Validating CPD platform ####" | tee -a ${OUTPUT}
+printout "$output"
+
 Nodes_Check
 Applications_Check
 Openshift_Check
@@ -716,5 +742,10 @@ Pod_Check
 
 ## CPD services specific checks
 Find_Services
-DV_Check
 
+output=""
+if [[ ${IS_DV} ]]; then
+    echo -e "\n#### Validating Data Virtualization service ####" | tee -a ${OUTPUT}
+    printout "$output"
+    DV_Check
+fi
