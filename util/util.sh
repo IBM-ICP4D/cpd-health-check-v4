@@ -1,10 +1,11 @@
 #!/bin/bash
 
 ## Configuration parameters
-export DV_PODS="dv-addon dv-api dv-caching dv-engine dv-metastore dv-service-provider dv-unified-console dv-utils dv-worker"
-export DV_DEPLOYMENTS="dv-addon dv-api dv-caching dv-service-provider dv-unified-console"
-export DV_STS="dv-engine dv-metastore dv-utils dv-worker"
+export DV_PODS=$(oc get $NH pods -l "app=dv" | awk '{print $1}')
+export DV_DEPLOYMENTS=$(oc get $NH deployments -l "app=dv" | awk '{print $1}')
+export DV_STS=$(oc get $NH sts -l "app=dv" | awk '{print $1}')
 export DV_SERVICES="dv dv-addon dv-api dv-caching dv-console-uc dv-internal dv-metastore dv-server dv-service-provider dv-utils"
+#export DV_SERVICES=$(oc get $NH services -l "app=dv" | awk '{print $1}') ## not all DV services labeled correctly
 
 
 get_installed_cpd_services() {
