@@ -17,6 +17,7 @@ find_installed_cpd_services() {
     export IS_WML=0
     export IS_WSL=0
     export IS_DATASTAGE=0
+    export IS_PORTWORX=0
     
     installed_service=$(oc rsh $(oc get pod|grep cpd-install-operator|awk '{print $1}') helm list --tls --short) 
     export IS_DV=$(echo ${installed_service} | grep dv | wc -l)
@@ -24,6 +25,7 @@ find_installed_cpd_services() {
     export IS_WML=$(echo ${installed_service} | grep wml | wc -l)
     export IS_WSL=$(echo ${installed_service} | grep wsl | wc -l)
     export IS_DATASTAGE=$(echo ${installed_service} | grep datastage | wc -l)
+    export IS_PORTWORX=$(oc get deployment -n kube-system --no-headers | wc -l)
 }
 
 find_installed_namespace() {

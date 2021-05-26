@@ -496,6 +496,76 @@ function check_high_pod_restart_count() {
     fi
 }
 
+function check_PX_nodes() {
+    output=""
+    echo -e "\nChecking Portworx nodes status" | tee -a ${OUTPUT}
+    px_pod=$(oc get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
+    cmd=$(oc exec $px_pod -n kube-system -- /opt/pwx/bin/pxctl status --json | jq -r '.cluster.Nodes[].NodeData."STORAGE-INFO".Status')
+    down_node_count=$(oc exec $px_pod -n kube-system -- /opt/pwx/bin/pxctl status --json | \
+                     jq -r '.cluster.Nodes[].NodeData."STORAGE-INFO".Status' | egrep -vi 'Up' | wc -l)
+
+    if [ $down_node_count -gt 0 ]; then
+        oc exec $px_pod -n kube-system -- /opt/pwx/bin/pxctl status --json | \
+           jq -r '.cluster.Nodes[] | {node: .SchedulerNodeName, status: .NodeData."STORAGE-INFO".Status}' | tee -a ${OUTPUT}
+        log "ERROR: Not all Portworx nodes are ready." result
+        ERROR=1
+    else
+        log "Checking Portworx nodes status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_PX_pods() {
+    output=""
+    echo -e "\nChecking Portworx pods status" | tee -a ${OUTPUT}
+    cmd=$(oc get pod -n kube-system -o wide | egrep portworx-api | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9|Complete')
+    echo "${cmd}" | tee -a ${OUTPUT}
+    down_pod_count=$(oc get pod $NH -n kube-system -o wide | egrep portworx-api | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9|Complete' | wc -l)
+
+    if [ $down_pod_count -gt 0 ]; then
+        log "ERROR: Portworx not running on all worker nodes." result
+        ERROR=1
+    else
+        log "Checking Portworx pod status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+function check_PX_volumes() {
+    output=""
+    echo -e "\nChecking Portworx volumes status" | tee -a ${OUTPUT}
+    px_pod=$(oc get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
+    cmd=$(oc exec $px_pod -n kube-system -- /opt/pwx/bin/pxctl volume list --json | jq -r '.[] | .status')
+    down_vol_count=$(oc exec $px_pod -n kube-system -- /opt/pwx/bin/pxctl volume list --json | \
+                     jq -r '.[] | .status' | egrep -vi 'Up' | wc -l)
+
+    if [ $down_vol_count -gt 0 ]; then
+        oc exec $px_pod -n kube-system -- /opt/pwx/bin/pxctl volume list --json | \
+              jq -r '.[] | {id: .id, status: .status}' | tee -a ${OUTPUT}
+        log "ERROR: Not all Portworx volumes are ready." result
+        ERROR=1
+    else
+        log "Checking Portworx volumes status [Passed]" result
+    fi
+    LOCALTEST=1
+    output+="$result"
+
+    if [[ ${LOCALTEST} -eq 1 ]]; then
+        printout "$output"
+    fi
+}
+
+
 function check_DV_pods() {
     output=""
     ERROR=0
@@ -712,6 +782,13 @@ function Find_Services() {
     find_installed_cpd_services
 }
 
+## Checks related to Portworx
+function PX_Check() {
+   check_PX_nodes
+   check_PX_pods
+   check_PX_volumes
+}
+
 ## Checks related to Data Virtualization service
 function DV_Check() {
     dv_namespace=$(find_installed_namespace dv)
@@ -744,6 +821,13 @@ Pod_Check
 Find_Services
 
 output=""
+
+if [[ ${IS_PORTWORX} -gt 0 ]]; then
+    echo -e "\n#### Validating Portworx ####" | tee -a ${OUTPUT}
+    printout "$output"
+    PX_Check
+fi
+
 if [[ ${IS_DV} -gt 0 ]]; then
     echo -e "\n#### Validating Data Virtualization service ####" | tee -a ${OUTPUT}
     printout "$output"
