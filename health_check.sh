@@ -744,7 +744,7 @@ Pod_Check
 Find_Services
 
 output=""
-if [[ ${IS_DV} ]]; then
+if [[ ${IS_DV} -gt 0 ]]; then
     echo -e "\n#### Validating Data Virtualization service ####" | tee -a ${OUTPUT}
     printout "$output"
     DV_Check
