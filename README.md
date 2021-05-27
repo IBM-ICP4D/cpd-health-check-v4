@@ -36,6 +36,14 @@ This section targets most common services e.g., WKC, WML, DV, DataStage etc.
 -	Application check
 -	Logs or event check
 
+
+| Validation | Details |
+| --- | --- |
+| Portworx pods | All portworx-api pods running |
+| Portworx nodes | All Portworx nodes up |
+| Portworx volumes | All Portworx volumes up |
+
+
 | Validation | Details |
 | --- | --- |
 | DV pods | All DV pods are exist |
