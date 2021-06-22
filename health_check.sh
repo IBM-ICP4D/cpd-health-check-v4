@@ -221,7 +221,7 @@ function check_node_disk_status() {
 function check_node_pid_status() {
     output=""
     all_nodes=`oc get nodes $NH | grep -w Ready | awk '{print $1}'`
-    echo -e "\nChecking disk status on nodes" | tee -a ${OUTPUT}
+    echo -e "\nChecking PID status on nodes" | tee -a ${OUTPUT}
     for i in `echo ${all_nodes}`
         do
             mem=$(oc describe node $i | grep 'PIDPressure      False' |  wc -l)
