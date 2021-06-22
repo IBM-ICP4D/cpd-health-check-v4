@@ -244,9 +244,9 @@ function check_node_pid_status() {
 function check_deployments() {
     output=""
     echo -e "\nChecking deployment status" | tee -a ${OUTPUT}
-    cmd=$(oc get deployment --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9')
+    cmd=$(oc get deployment --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9|10/10')
     echo "${cmd}" | tee -a ${OUTPUT}
-    down_deployment_count=$(oc get $NH deployment --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9' | wc -l) 
+    down_deployment_count=$(oc get $NH deployment --all-namespaces | egrep -v '0/0|1/1|2/2|3/3|4/4|5/5|6/6|7/7|8/8|9/9|10/10' | wc -l) 
 
     if [ $down_deployment_count -gt 0 ]; then
         log "ERROR: Not all deployments are ready." result
