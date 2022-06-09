@@ -10,7 +10,6 @@ This section targets OpenShift and CPD platform specific checks.
 | Nodes status | Validate nodes in ready state |
 | Nodes CPU utilization | Flag nodes where CPU usage higher than 80% |
 | Nodes memory utilization | Flag nodes where memory usage higher than 80% |
-| Time difference between nodes | Validate time difference between nodes not more than 400 ms |
 | Nodes memory status | Identify nodes with memory pressure |
 | Nodes disk status | Identify nodes with disk pressure |
 | Nodes pid status | Identify nodes with PID pressure |
@@ -58,12 +57,12 @@ This section targets most common services e.g., WKC, WML, DV, DataStage etc.
 
 2. Clone git repository:
 ```
-git clone https://github.com/IBM-ICP4D/cpd-health-check-v3.git
+git clone https://github.com/IBM-ICP4D/cpd-health-check-v4.git
 ```
 
-3. Go to to `Install_Precheck_CPD_v3` directory:
+3. Go to to `cpd-health-check-v4` directory:
 ```
-cd cpd-health-check-v3
+cd cpd-health-check-v4
 ```
 
 3. Login to OpenShift with an user having cluster-admin role:
