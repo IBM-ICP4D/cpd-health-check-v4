@@ -149,7 +149,6 @@ function check_node_memory_utilization() {
 
 function check_node_time_difference() {
     output=""
-    #all_nodes=`oc get nodes -o=jsonpath="{range .items[*]}{.metadata.name}{.name}{'\n'}"`
     all_nodes=`oc get nodes $NH | grep -w Ready | awk '{print $1}'`
     echo -e "\nChecking time difference between nodes" | tee -a ${OUTPUT}
     for i in `echo ${all_nodes}`
@@ -681,9 +680,9 @@ function check_DV_services() {
 function check_DV_databse_instance() {
     output=""
     echo -e "\nChecking DV database instance status" | tee -a ${OUTPUT}
-    cmd=$(find_db2_status dv-engine-0 bigsql)
+    cmd=$(find_db2_status c-db2u-dv-db2u-0 db2inst1)
     echo "${cmd}" | tee -a ${OUTPUT}
-    down_db_count=$(find_db2_status dv-engine-0 bigsql | grep "Active" | wc -l) 
+    down_db_count=$(find_db2_status c-db2u-dv-db2u-0 db2inst1 | grep "Active" | wc -l) 
 
     if [[ ${down_db_count} -lt 1 ]]; then
         log "ERROR: Bigsql instance is not ready." result
@@ -724,7 +723,7 @@ function Nodes_Check() {
     check_node_status
     check_node_cpu_utilization
     check_node_memory_utilization
-    check_node_time_difference
+    # check_node_time_difference # Uncomment only if you permitted to run clockdiff 
     check_node_memory_status
     check_node_disk_status
     check_node_pid_status
@@ -833,3 +832,5 @@ if [[ ${IS_DV} -gt 0 ]]; then
     printout "$output"
     DV_Check
 fi
+
+echo -e "\n#### Healthcheck results generated at /tmp/HealthCheckResult ####" | tee -a ${OUTPUT}
