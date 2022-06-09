@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ## Configuration parameters
-export DV_PODS="dv-addon dv-api dv-caching dv-engine dv-metastore dv-service-provider dv-unified-console dv-utils dv-worker"
-export DV_DEPLOYMENTS="dv-addon dv-api dv-caching dv-service-provider dv-unified-console"
-export DV_STS="dv-engine dv-metastore dv-utils dv-worker"
-export DV_SERVICES="dv dv-addon dv-api dv-caching dv-console-uc dv-internal dv-metastore dv-server dv-service-provider dv-utils"
+export DV_PODS="c-db2u-dv-db2u c-db2u-dv-dvapi c-db2u-dv-dvcaching c-db2u-dv-dvutils c-db2u-dv-hurricane-dv dv-addon dv-service-provider"
+export DV_DEPLOYMENTS="c-db2u-dv-dvapi c-db2u-dv-dvcaching c-db2u-dv-hurricane-dv dv-addon dv-api dv-caching dv-service-provider dv-unified-console"
+export DV_STS="c-db2u-dv-db2u c-db2u-dv-dvutils dv-engine dv-metastore dv-utils dv-worker"
+export DV_SERVICES="c-db2u-dv-db2u c-db2u-dv-db2u-engn-svc c-db2u-dv-db2u-internal c-db2u-dv-dv-api-engine c-db2u-dv-dvapi c-db2u-dv-dvcaching c-db2u-dv-dvutils c-db2u-dv-hurricane-dv dv dv-addon dv-api dv-caching dv-console-uc dv-internal dv-metastore dv-server dv-service-provider dv-utils"
 
 
 get_installed_cpd_services() {
@@ -13,19 +13,19 @@ get_installed_cpd_services() {
 
 find_installed_cpd_services() {
     export IS_DV=0
+    export IS_DMC=0
     export IS_WKC=0
     export IS_WML=0
     export IS_WSL=0
     export IS_DATASTAGE=0
     export IS_PORTWORX=0
     
-    installed_service=$(oc rsh $(oc get pod|grep cpd-install-operator|awk '{print $1}') helm list --tls --short) 
-    export IS_DV=$(echo ${installed_service} | grep dv | wc -l)
-    export IS_WKC=$(echo ${installed_service} | grep wkc | wc -l)
-    export IS_WML=$(echo ${installed_service} | grep wml | wc -l)
-    export IS_WSL=$(echo ${installed_service} | grep wsl | wc -l)
-    export IS_DATASTAGE=$(echo ${installed_service} | grep datastage | wc -l)
-    export IS_PORTWORX=$(oc get deployment -n kube-system --no-headers | wc -l)
+    export IS_DV=$(oc get dvservice --no-headers | wc -l)
+    export IS_DMC=$(oc get dmc --no-headers | wc -l)
+    export IS_WKC=$(oc get wkc --no-headers | wc -l)
+    #export IS_PORTWORX=$(oc get px --no-headers | wc -l) ## This is just a place holder
+
+    if [ $IS_DV ]; then export DV_NS=$(oc get wkc -o jsonpath='{.items[0].metadata.namespace}'); fi
 }
 
 find_installed_namespace() {
@@ -40,7 +40,7 @@ find_db2_status() {
    pod_name=$1
    db2_instance=$2
 
-   kubectl exec -it $pod_name -- bash -c "export DB2INSTANCE=$db2_instance && ~/sqllib/adm/db2pd -" 
+   kubectl exec -it $pod_name -- bash -c "su -l $db2_instance -c '~/sqllib/adm/db2pd -'" 
 }
 
 typeset -fx get_installed_cpd_services
