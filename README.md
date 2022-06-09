@@ -91,8 +91,9 @@ cd <full path>/cpd-health-check-v4
 mail -s "CPD Health Check" <email address> < /tmp/HealthCheckResult
 ```
 
-2. Setup a cronjob. For example: run the script at 6:05 AM everyday
+2. Setup a cronjob. For example: run the shell script at 6:05 AM everyday
 ```
-$ crontab -l
+$ crontab -e
+
 5 6 * * * /vzwhome/chaksa9/cron_cpd_healthcheck.sh > /dev/null 2>&1
 ```
