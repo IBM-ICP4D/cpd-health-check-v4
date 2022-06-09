@@ -80,3 +80,19 @@ The health check tool will direct result outputs to screen, you can view same re
 
 <img width="1038" alt="image" src="https://user-images.githubusercontent.com/17136230/117359964-d03f2b80-aed5-11eb-9f6d-baaa9dd60a5c.png">
 
+## Setup a Cron job to run health check script
+1. Create a shell script to call the healthCheck. For example:
+```
+$ cat /vzwhome/chaksa9/cron_cpd_healthcheck.sh
+
+oc login -u kubeadmin -p <kubeadmin password> https://<CPD URL>:6443
+cd <full path>/cpd-health-check-v4
+./health_check.sh > /dev/null 2>&1
+mail -s "CPD Health Check" <email address> < /tmp/HealthCheckResult
+```
+
+2. Setup a cronjob. For example: run the script at 6:05 AM everyday
+```
+$ crontab -l
+5 6 * * * /vzwhome/chaksa9/cron_cpd_healthcheck.sh > /dev/null 2>&1
+```
