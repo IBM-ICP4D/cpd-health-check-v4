@@ -109,7 +109,7 @@ function check_node_cpu_utilization() {
     cmd=$(oc adm top nodes)
     echo "${cmd}" | tee -a ${OUTPUT}
     high_cpu_usage=$(oc adm top nodes $NH | egrep -v "unknown" | \
-                   awk '{ gsub(/[%]+/," "); print $1 " " $3}'| awk '{if ($2 >= "80" ) print }' | wc -l) 
+                   awk '{ gsub(/[%]+/," "); print $1 " " $3}'| awk '{if (int($2) >= 80 ) print }' | wc -l) 
 
     if [ $high_cpu_usage -gt 0 ]; then
         log "WARNING: Some nodes have above 80% CPU utilization." result
@@ -131,7 +131,7 @@ function check_node_memory_utilization() {
     cmd=$(oc adm top nodes)
     echo "${cmd}" | tee -a ${OUTPUT}
     high_memory_usage=$(oc adm top nodes $NH | egrep -v "unknown" | \
-                   awk '{ gsub(/[%]+/," "); print $1 " " $5}'| awk '{if ($2 >= "80" ) print }' | wc -l) 
+                   awk '{ gsub(/[%]+/," "); print $1 " " $5}'| awk '{if (int($2) >= 80 ) print }' | wc -l) 
 
     if [ $high_memory_usage -gt 0 ]; then
         log "WARNING: Some nodes have above 80% memory utilization." result
