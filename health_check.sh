@@ -837,6 +837,7 @@ Applications_Check
 Openshift_Check
 Volume_Check
 Pod_Check
+TLS_Cert_Check
 
 ## CPD services specific checks
 Find_Services
