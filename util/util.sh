@@ -43,8 +43,17 @@ find_db2_status() {
    kubectl exec -it $pod_name -- bash -c "su -l $db2_instance -c '~/sqllib/adm/db2pd -'" 
 }
 
+find_tls_cert_validity() {
+   name_space=$1
+   secret_name=$2
+   tls_cert_name=$3
+
+   oc get -n $name_space secret $secret_name -o jsonpath="{.data.$tls_cert_name}" | base64 -d | openssl x509 -text | \
+      grep -A2 "Validity"
+}
+
 typeset -fx get_installed_cpd_services
 typeset -fx find_installed_cpd_services
 typeset -fx find_installed_namespace
 typeset -fx find_db2_status
-
+typeset -fx find_tls_cert_validity
