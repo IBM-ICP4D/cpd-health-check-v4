@@ -18,7 +18,7 @@ This section targets OpenShift and CPD platform specific checks.
 | Replicasets status | Validate all replicasets available |
 | Daemonsets status | Validate all daemonsets available |
 | Routes status | CPD and Openshift console routes accessible |
-| Openshift certificates status | Validate certificate signing requests in approve state |
+| Openshift certificates signing status | Validate certificate signing requests in approve state |
 | Openshift ETCD status | All ETCD members are available |
 | Persistent volume status | Validate PVs in bound state |
 | Persistent volume claims status | Validate PVCs in bound state |
