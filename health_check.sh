@@ -698,6 +698,22 @@ function check_DV_databse_instance() {
     fi
 }
 
+function check_external_tls() {
+    output=""
+    echo -e "\nExternal TLS Certificate" | tee -a ${OUTPUT}
+    cmd=$(find_tls_cert_validity $cpd_namespace external-tls-secret "cert\.crt")
+    echo "${cmd}" | tee -a ${OUTPUT}
+    printout "$output"
+}
+
+function check_internal_tls() {
+    output=""
+    echo -e "\nInternal TLS Certificate" | tee -a ${OUTPUT}
+    cmd=$(find_tls_cert_validity $cpd_namespace internal-tls "tls\.crt")
+    echo "${cmd}" | tee -a ${OUTPUT}
+    printout "$output"
+}
+
 
 #######################################
 #### CPD platform specific checks  ####
@@ -762,6 +778,12 @@ function Pod_Check() {
     check_high_pod_restart_count
 }
 
+## Checks specific to TLS Certificate ##
+function TLS_Cert_Check() {
+    cpd_namespace=$(find_installed_namespace 0010-infra)
+    check_external_tls
+    check_internal_tls
+}
 
 #######################################
 #### CPD services specific checks  ####
