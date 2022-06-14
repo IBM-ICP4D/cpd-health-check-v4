@@ -26,6 +26,8 @@ This section targets OpenShift and CPD platform specific checks.
 | High CPU consuming pods | List top 15 CPU consumed pods |
 | High memory consuming pods | List top 15 memory consumed pods |
 | High numner of restarted pods | List top 15 pods that restarted |
+| External TLS Certificate | Verify TLS Certificate active |
+| Internal TLS Certificate | Verify TLS Certificate active |
 
 ### Validate CPD Services <img width="40" alt="image" src="https://user-images.githubusercontent.com/17136230/117361229-632c9580-aed7-11eb-9e1d-0210c5398207.png">
 
