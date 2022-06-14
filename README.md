@@ -71,8 +71,11 @@ cd cpd-health-check-v4
 ```
 oc login <OpenShift Console URL> -u <username> -p <password>
 ```
-
-4. Run the script:
+4. Change project CPD project
+```
+oc project <project>
+```
+5. Run the script:
 ```
 ./health_check.sh
 ```
@@ -88,6 +91,7 @@ The health check tool will direct result outputs to screen, you can view same re
 $ cat /vzwhome/chaksa9/cron_cpd_healthcheck.sh
 
 oc login -u kubeadmin -p <kubeadmin password> https://<CPD URL>:6443
+oc project <CPD project name>
 cd <full path>/cpd-health-check-v4
 ./health_check.sh > /dev/null 2>&1
 mail -s "CPD Health Check" <email address> < /tmp/HealthCheckResult
