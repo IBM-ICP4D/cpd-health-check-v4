@@ -67,15 +67,17 @@ git clone https://github.com/IBM-ICP4D/cpd-health-check-v4.git
 cd cpd-health-check-v4
 ```
 
-3. Login to OpenShift with an user having cluster-admin role:
+4. Login to OpenShift with an user having cluster-admin role:
 ```
 oc login <OpenShift Console URL> -u <username> -p <password>
 ```
-4. Change project CPD project
+
+5. Change project CPD project
 ```
 oc project <project>
 ```
-5. Run the script:
+
+6. Run the script:
 ```
 ./health_check.sh
 ```
