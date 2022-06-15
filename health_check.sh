@@ -859,21 +859,22 @@ TLS_Cert_Check
 ## CPD services specific checks
 Find_Services
 
-output=""
-
 if [[ ${IS_PORTWORX} -gt 0 ]]; then
+    output=""
     echo -e "\n#### Validating Portworx ####" | tee -a ${OUTPUT}
     printout "$output"
     PX_Check
 fi
 
 if [[ ${IS_DV} -gt 0 ]]; then
+    output=""
     echo -e "\n#### Validating Data Virtualization service ####" | tee -a ${OUTPUT}
     printout "$output"
     DV_Check
 fi
 
 if [[ ${IS_WKC} -gt 0 ]]; then
+    output=""
     echo -e "\n#### Validating WKC service ####" | tee -a ${OUTPUT}
     printout "$output"
     WKC_Check
