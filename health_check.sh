@@ -714,6 +714,17 @@ function check_internal_tls() {
     printout "$output"
 }
 
+function WKC_DB2_TLS_check() {
+    output=""
+    echo -e "\nWKC Db2u TLS Certificate Validity" | tee -a ${OUTPUT}
+    cmd=$(find_db2_tls_cert_validity c-db2oltp-wkc-db2u-0)
+    echo "${cmd}" | tee -a ${OUTPUT}
+
+    echo -e "\nIIS Db2u TLS Certificate Validity" | tee -a ${OUTPUT}
+    cmd=$(find_db2_tls_cert_validity c-db2oltp-iis-db2u-0)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    printout "$output"
+}
 
 #######################################
 #### CPD platform specific checks  ####
@@ -820,6 +831,12 @@ function DV_Check() {
     check_DV_databse_instance
 }
 
+## Checks related to WKC service
+function WKC_Check() {
+    wkc_namespace=$WKC_NS
+    WKC_DB2_TLS_check
+}
+
 
 #######################################
 ####             MAIN              ####
@@ -854,6 +871,12 @@ if [[ ${IS_DV} -gt 0 ]]; then
     echo -e "\n#### Validating Data Virtualization service ####" | tee -a ${OUTPUT}
     printout "$output"
     DV_Check
+fi
+
+if [[ ${IS_WKC} -gt 0 ]]; then
+    echo -e "\n#### Validating WKC service ####" | tee -a ${OUTPUT}
+    printout "$output"
+    WKC_Check
 fi
 
 echo -e "\n#### Healthcheck results generated at /tmp/HealthCheckResult ####" | tee -a ${OUTPUT}
