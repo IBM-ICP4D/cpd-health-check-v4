@@ -726,6 +726,14 @@ function WKC_DB2_TLS_check() {
     printout "$output"
 }
 
+function DV_BIGSQL_TLS_check() {
+    output=""
+    echo -e "\nDV BigSQL TLS Certificate Validity" | tee -a ${OUTPUT}
+    cmd=$(find_bigsql_tls_cert_validity c-db2u-dv-db2u-0)
+    echo "${cmd}" | tee -a ${OUTPUT}
+    printout "$output"
+}
+
 #######################################
 #### CPD platform specific checks  ####
 #######################################
@@ -829,6 +837,7 @@ function DV_Check() {
     check_DV_deployments
     check_DV_services
     check_DV_databse_instance
+    DV_BIGSQL_TLS_check
 }
 
 ## Checks related to WKC service
