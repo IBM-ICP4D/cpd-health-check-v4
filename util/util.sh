@@ -63,9 +63,17 @@ find_db2_tls_cert_validity() {
       -db bludb_ssl.kdb -stashed -label CN=zen-ca-cert" | egrep 'Not Before|Not After'
 }
 
+find_bigsql_tls_cert_validity() {
+   pod_name=$1
+
+   oc exec -n $DV_NS $pod_name -- ksh -lc "su - db2inst1 -c 'cd /mnt/blumeta0/db2/ssl_keystore; gsk8capicmd_64 -cert -details \
+      -db bludb_ssl.kdb -stashed -label CN=zen-ca-cert'" | egrep 'Not Before|Not After'
+}
+
 typeset -fx get_installed_cpd_services
 typeset -fx find_installed_cpd_services
 typeset -fx find_installed_namespace
 typeset -fx find_db2_status
 typeset -fx find_tls_cert_validity
 typeset -fx find_db2_tls_cert_validity
+typeset -fx find_bigsql_tls_cert_validity
