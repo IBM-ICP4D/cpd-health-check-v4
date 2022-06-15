@@ -12,6 +12,7 @@ get_installed_cpd_services() {
 }
 
 find_installed_cpd_services() {
+    export IS_ZEN=0
     export IS_DV=0
     export IS_DMC=0
     export IS_WKC=0
@@ -20,12 +21,16 @@ find_installed_cpd_services() {
     export IS_DATASTAGE=0
     export IS_PORTWORX=0
     
+    export IS_ZEN=$(oc get zenservice --no-headers | wc -l)
     export IS_DV=$(oc get dvservice --no-headers | wc -l)
     export IS_DMC=$(oc get dmc --no-headers | wc -l)
     export IS_WKC=$(oc get wkc --no-headers | wc -l)
     #export IS_PORTWORX=$(oc get px --no-headers | wc -l) ## This is just a place holder
 
-    if [ $IS_DV ]; then export DV_NS=$(oc get wkc -o jsonpath='{.items[0].metadata.namespace}'); fi
+    if [ $IS_ZEN ]; then export ZEN_NS=$(oc get zenservice -o jsonpath='{.items[0].metadata.namespace}'); fi
+    if [ $IS_DV ]; then export DV_NS=$(oc get dvservice -o jsonpath='{.items[0].metadata.namespace}'); fi
+    if [ $IS_DMC ]; then export DMC_NS=$(oc get dmc -o jsonpath='{.items[0].metadata.namespace}'); fi
+    if [ $IS_WKC ]; then export WKC_NS=$(oc get wkc -o jsonpath='{.items[0].metadata.namespace}'); fi
 }
 
 find_installed_namespace() {
