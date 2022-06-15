@@ -38,7 +38,6 @@ find_installed_namespace() {
 
    oc rsh $(oc get pod|grep cpd-install-operator|awk '{print $1}') helm list --tls --output json | \
       jq -r --arg n "$helm_name" '.Releases[] | select (.Name==$n) | .Namespace'
-
 }
 
 find_db2_status() {
