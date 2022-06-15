@@ -791,7 +791,7 @@ function Pod_Check() {
 
 ## Checks specific to TLS Certificate ##
 function TLS_Cert_Check() {
-    cpd_namespace=$(find_installed_namespace 0010-infra)
+    cpd_namespace=$ZEN_NS
     check_external_tls
     check_internal_tls
 }
@@ -804,8 +804,8 @@ function TLS_Cert_Check() {
 function Find_Services() {
     output=""
     log "" result
-    echo -e "\nList of installed CPD service helm charts" | tee -a ${OUTPUT}
-    cmd=$(get_installed_cpd_services)
+    echo -e "\nList of installed CPD services" | tee -a ${OUTPUT}
+    cmd=$(oc get csv -n ibm-common-services)
     echo "${cmd}" | tee -a ${OUTPUT}
     LOCALTEST=1
     output+="$result"
@@ -823,7 +823,7 @@ function PX_Check() {
 
 ## Checks related to Data Virtualization service
 function DV_Check() {
-    dv_namespace=$(find_installed_namespace dv)
+    dv_namespace=$DV_NS
     check_DV_pods
     check_DV_sts
     check_DV_deployments
@@ -849,6 +849,7 @@ output=""
 echo -e "\n#### Validating CPD platform ####" | tee -a ${OUTPUT}
 printout "$output"
 
+Find_Services
 Nodes_Check
 Applications_Check
 Openshift_Check
@@ -857,8 +858,6 @@ Pod_Check
 TLS_Cert_Check
 
 ## CPD services specific checks
-Find_Services
-
 if [[ ${IS_PORTWORX} -gt 0 ]]; then
     output=""
     echo -e "\n#### Validating Portworx ####" | tee -a ${OUTPUT}
