@@ -52,6 +52,7 @@ This section targets most common services e.g., WKC, WML, DV, DataStage etc.
 | DV deployments | All DV deployments are exist |
 | DV services | All DV services are exist |
 | DV internal database | BIGSQL instance is running |
+| BigSQL TLS Certificate | Verify BigSQL TLS Certificate active |
 
 
 ## Setup and execution 
