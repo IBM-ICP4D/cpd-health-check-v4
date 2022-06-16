@@ -56,6 +56,7 @@ This section targets most common services e.g., WKC, WML, DV, DataStage etc.
 
 
 | Validation | Details |
+| --- | --- |
 | WKC DB2 TLS Certificate | Verify WKC DB2 TLS Certificate active |
 | IIS DB2 TLS Certificate | Verify IIS DB2 TLS Certificate active |
 
