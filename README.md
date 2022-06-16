@@ -55,6 +55,11 @@ This section targets most common services e.g., WKC, WML, DV, DataStage etc.
 | BigSQL TLS Certificate | Verify BigSQL TLS Certificate active |
 
 
+| Validation | Details |
+| WKC DB2 TLS Certificate | Verify WKC DB2 TLS Certificate active |
+| IIS DB2 TLS Certificate | Verify IIS DB2 TLS Certificate active |
+
+
 ## Setup and execution 
 1. Use any Linux machine with OpenShift client (oc) installed that can connect to the CPD cluster.
 
