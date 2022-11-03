@@ -1,13 +1,24 @@
+### This script runs all health check endpoints
+### Assumptions as follows
+# - Works with 4.x releases
+# - Access to cp4d host via shell
+# - python is installed (for pretty printing)
+# - User has credentials to login cp4d env, admin credentials recommended
+# to execute just run the script and follow the prompts
+
 #!/bin/bash
 
-CP4DNS=$(oc project -q)
-
-[[ ${CP4DNS} == "dev" ]] && CP4DURL="https://cp4d_url"
-[[ ${CP4DNS} == "cpd" ]] && CP4DURL="https://cp4d_url"
-
-read -p "Enter your userid: " USERID
-read -s -p "Enter your password: " PASSWORD
-echo ""
+if [ "$#" -eq 4 ]
+then
+  CP4DURL=$1
+  CP4DNS=$2
+  USERID=$3
+  PASSWORD=$4
+else
+  echo "Usage ./wkc_healthcheck.sh <https://hostname> <CPD project> <usename> <password>"
+  echo "example ./wkc_healthcheck.sh https://zen-cpd-zen.apps.xen-cea-bvt-oc-46-pwx-8.os.fyre.ibm.com cpd-project admin-user admin-user-password" 
+  exit 1
+fi
 
 # Check some APIs
 # Get a Bearer token
@@ -20,7 +31,7 @@ BASICTOKEN=$(echo -n ${USERID}:${PASSWORD} | base64)
 #Get a IGC token
 IGC_TOKEN=$(curl -s -X POST -k ${CP4DURL}/ibm/iis/api/auth_token/v1/tokens -d "{\"username\":\"${USERID}\", \"password\": \"${PASSWORD}\"}" | jq -r '.access_token')
 
-echo "Cechking ICP4D status"
+echo "Cechking CPD status"
 CPD_STATUS=$(curl -s -k -X GET "${CP4DURL}/icp4d-api/v1/monitor" -H "Authorization: Bearer ${TOKEN}" -H 'cache-control: no-cache' | jq -r '.message')
 echo "   CP4D status: ${CPD_STATUS}"
 
@@ -37,7 +48,7 @@ echo "   CP4D status: ${CPD_STATUS}"
 echo "OMAG health check (pod -l app=omag)"
 curl -s -X GET -k "${CP4DURL}/ibm/iis/api/igc-omrs/servers/igc_omrs/healthcheck" -H "Authorization: Bearer ${IGC_TOKEN}"  | jq -r '"   Kafka: " + .kafka_connection, "   Redis: " + .redis_connection, "   Status: " + .status'
 
-echo "running BG health check (pod -l app=wkc-glossary-service)"
+echo "Running BG health check (pod -l app=wkc-glossary-service)"
 curl -s -k -X GET "${CP4DURL}/v3/glossary_terms/admin/open-metadata/healthcheck" -H "Authorization: Bearer ${TOKEN}" -H 'cache-control: no-cache' | jq -r '"   Status: " + .status'
 
 echo "Getting default catalog id"
@@ -56,11 +67,11 @@ do
 done
 
 
-echo "running CAMS health check (pod -l app=catalog-api)"
+echo "Running CAMS health check (pod -l app=catalog-api)"
 curl -s -k -X GET "${CP4DURL}/v2/catalogs/default/healthcheck" -H "Authorization: Bearer ${TOKEN}" -H 'cache-control: no-cache' | jq -r '"   Status: " + .status, "   Event mapper open: " + (.event_mapper_status.connection_open|tostring), "   Event mapper status: " + .event_mapper_status.connection_status, "   Consumer status: " + .event_mapper_status.consumer_status'
 
 
-echo "running Auto Discovery health check"
+echo "Running Auto Discovery health check"
 curl -s -k -X GET "${CP4DURL}/ibm/iis/odf/v1/discovery/systemcheck" -H "Authorization: Basic ${BASICTOKEN}" -H 'cache-control: no-cache' | jq -r '"   " + .details, "   " + .auditTrailHealth.details, "   " + .solrHealth.details'
 
 echo "Checking Finley health"
